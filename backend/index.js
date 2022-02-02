@@ -5,8 +5,10 @@ connectToMongo();
 const app = express()
 const port = 3000
 
-//Available Routes
+//this method is used to recognize incoming request object as a JSON object(this is built in method in express)
+app.use(express.json());
 
+//Available Routes
 app.use('/api/auth',require('./routes/auth'));
 app.use('/api/notes',require('./routes/notes'));
 
