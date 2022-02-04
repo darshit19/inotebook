@@ -1,3 +1,4 @@
+//whenever we will create schema we need to import mongoose and schema
 const mongoose=require('mongoose');
 const { Schema } = mongoose;
 
@@ -20,6 +21,10 @@ const UserSchema = new Schema({
         default:Date.now
     },
   });
-const User=mongoose.model('user',UserSchema);
-User.createIndexes();
-  module.exports=User;
+
+  //we need to export our schema for use 
+const User=mongoose.model('user',UserSchema);//here 'user'=modelname UserSchema=Our schema
+module.exports=User;
+
+  //module.exports=mongoose.model('user',UserSchema);
+  //we can also export our schema like this in this method declaration of variable 'user' isn't required
