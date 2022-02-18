@@ -82,6 +82,8 @@ router.post(
     body("email", "Please enter a valid mail").isEmail(),
     body("password", "Password can not be blank").exists()//exists() function will check if its value is null or not
   ], async (req, res) => {
+    let success=false;
+
     //If there are errors,return bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -92,11 +94,13 @@ router.post(
     try {
       let user = await User.findOne({ email });//we are finding user with our User model
       if (!user) {
-        return res.json({ error: "Please try to log in with correct Credentials" });
+        success=false;
+        return res.json({success, error: "Please try to log in with correct Credentials" });
       }
       const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
-        return res.json({ error: "Please try to log in with correct Credentials" });
+        success=false;
+        return res.json({success, error: "Please try to log in with correct Credentials" });
       }
 
       //this will create a token
@@ -106,7 +110,8 @@ router.post(
         }
       }
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ authToken });//token created till here
+      success=true;
+      res.json({ success,authToken });//token created till here
 
     } catch (error) {
       console.log(error.message);
