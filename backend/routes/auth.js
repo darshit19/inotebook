@@ -5,7 +5,7 @@ const { body, validationResult } = require("express-validator"); //I've install 
 const bcrypt = require("bcryptjs"); //for password hashing
 const jwt = require("jsonwebtoken"); //for creating JWT token which will be given to user
 const JWT_SECRET = "darshitisagood$boy"; //this is my signature for jwt token
-const fetchuser=require("../middleware/fetchuser");//import fetchuser from middleware folder
+const fetchuser = require("../middleware/fetchuser");//import fetchuser from middleware folder
 
 //Endpoint for create user
 //ROUTE 1 : Create user using: POST "/api/auth/createuser".No log in require
@@ -20,6 +20,7 @@ router.post(
   ],
 
   async (req, res) => {
+    let success=false;
     //If there are errors,return bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -31,7 +32,8 @@ router.post(
       //I wrapped it into try catch block because if any other error will come rather  than the email exists or not then we cant't allow to continue
       let user = await User.findOne({ email: req.body.email });
       if (user) {
-        return res.status(400).json({ error: "Sorry a user with this email already exists" });
+        success=false;
+        return res.status(400).json({ success,error: "Sorry a user with this email already exists" });
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -49,9 +51,10 @@ router.post(
           id: user.id,
         },
       };
+      success=true;
       const authToken = jwt.sign(data, JWT_SECRET);
       console.log(authToken);
-      res.json({ authToken });//token created till here
+      res.json({ success,authToken });//token created till here
       // res.json(user);
     } catch (error) {
       console.log(error.message);
@@ -82,7 +85,7 @@ router.post(
     body("email", "Please enter a valid mail").isEmail(),
     body("password", "Password can not be blank").exists()//exists() function will check if its value is null or not
   ], async (req, res) => {
-    let success=false;
+    let success = false;
 
     //If there are errors,return bad request and the errors
     const errors = validationResult(req);
@@ -94,13 +97,13 @@ router.post(
     try {
       let user = await User.findOne({ email });//we are finding user with our User model
       if (!user) {
-        success=false;
-        return res.json({success, error: "Please try to log in with correct Credentials" });
+        success = false;
+        return res.json({ success, error: "Please try to log in with correct Credentials" });
       }
       const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
-        success=false;
-        return res.json({success, error: "Please try to log in with correct Credentials" });
+        success = false;
+        return res.json({ success, error: "Please try to log in with correct Credentials" });
       }
 
       //this will create a token
@@ -110,8 +113,8 @@ router.post(
         }
       }
       const authToken = jwt.sign(data, JWT_SECRET);
-      success=true;
-      res.json({ success,authToken });//token created till here
+      success = true;
+      res.json({ success, authToken });//token created till here
 
     } catch (error) {
       console.log(error.message);
@@ -123,10 +126,10 @@ router.post(
 //ROUTE 3 : Get loggedin user details using : POST "/api/auth/getuser" .Login required
 //In this token we need to create middleware -'fetchuser' because here we need user to loggedin so we will check user's token and if it's valid then and only then we will provide information otherwise we will deny access .So here fetchuser is middleware
 router.post(
-  "/getuser", fetchuser,async (req, res) => {
+  "/getuser", fetchuser, async (req, res) => {
     try {
-      userId=req.user.id;
-      const user=await User.findById(userId).select("-password");
+      userId = req.user.id;
+      const user = await User.findById(userId).select("-password");
       res.send(user);
     } catch (error) {
       console.log(error.message);
