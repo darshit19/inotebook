@@ -36,8 +36,9 @@ const Signup = (props) => {
   }
   return (
     <div className='container'>
+      <h2 className='mt-3'>Create an account to use iNotebook</h2>
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
+        <div className="mb-3 mt-3">
           <label htmlFor="exampleInputEmail1" className="form-label">Name</label>
           <input type="name" className="form-control" id="name" name='name'  onChange={onChange} required/>
         </div>
